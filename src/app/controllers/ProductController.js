@@ -1,6 +1,7 @@
 import * as Yup from "yup"
 import Product from "../models/Product"
 import Category from "../models/Category"
+import User from "../models/User"
 
 class ProductController {
   async store(request, response) {
@@ -14,6 +15,12 @@ class ProductController {
       await schema.validateSync(request.body, { abortEarly: false })
     } catch (error) {
       return response.status(400).json({ error: error.errors })
+    }
+
+    const { admin: userIsAdmin } = await User.findByPk(request.userId)
+
+    if(!userIsAdmin){
+      return response.status(400).json({message: "User is not admin"})
     }
 
     const { filename: path } = request.file

@@ -2,6 +2,7 @@ import * as Yup from "yup"
 import Product from "../models/Product"
 import Category from "../models/Category"
 import Order from "../schemas/Order"
+import User from "../models/User"
 
 class OrderController {
   async store(request, response) {
@@ -86,6 +87,12 @@ class OrderController {
       await schema.validateSync(request.body, { abortEarly: false })
     } catch (error) {
       return response.status(400).json({ error: error.errors })
+    }
+
+    const { admin: userIsAdmin } = await User.findByPk(request.userId)
+
+    if(!userIsAdmin){
+      return response.status(400).json({message: "User is not admin"})
     }
 
     const { id } = request.params
